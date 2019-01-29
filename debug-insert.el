@@ -51,7 +51,8 @@
   "Find debug command based on buffer's major mode"
   (let* ((default-commands '(("ruby-mode" . "byebug")
                              ("js-mode" . "debugger")
-                             ("emacs-lisp-mode" . "check")))
+                             ("emacs-lisp-mode" . "(debug)")
+                             ("elixir-mode" . "require IEx; IEx.pry"))
          (buffer-command (cdr (assoc (symbol-name major-mode) default-commands))))
     (if buffer-command
         (setq debug-insert-buffer-command buffer-command)
