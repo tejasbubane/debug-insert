@@ -1,0 +1,40 @@
+# This config is taken from: https://github.com/flycheck/emacs-travis
+
+language: emacs-lisp
+
+# Emacs fails to build in container-based builds on Travis
+# See https://github.com/travis-ci/travis-ci/issues/9061
+# and https://github.com/moby/moby/issues/22801
+sudo: required
+
+dist: trusty
+
+cache:
+  - directories:
+      # Cache stable Emacs binaries (saves 1min per job)
+      - "$HOME/emacs/"
+
+# Allow Emacs snapshot builds to fail and don’t wait for these as they can take
+# a looooong time
+matrix:
+  fast_finish: true
+
+env:
+  - EMACS_VERSION=24.4
+  - EMACS_VERSION=25.3
+  - EMACS_VERSION=26.1
+
+before_install:
+  # Configure $PATH: Executables are installed to $HOME/bin
+  - export PATH="$HOME/bin:$PATH"
+  # Download the makefile to emacs-travis.mk
+  - wget 'https://raw.githubusercontent.com/flycheck/emacs-travis/master/emacs-travis.mk'
+  # Install Emacs (according to $EMACS_VERSION) and Cask
+  - make -f emacs-travis.mk install_emacs
+  - make -f emacs-travis.mk install_cask
+  # Install Texinfo, if you need to build info manuals for your project
+  - make -f emacs-travis.mk install_texinfo
+
+script:
+  # Run your tests
+  - emacs -batch -l ert -l debug-insert-test.el -f ert-run-tests-batch-and-exit
